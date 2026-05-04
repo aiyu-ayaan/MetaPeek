@@ -16,6 +16,7 @@ import { twMerge } from 'tailwind-merge';
 import { JsonViewer } from './components/JsonViewer';
 import { SkeletonLoader } from './components/SkeletonLoader';
 import { SocialPreview } from './components/SocialPreview';
+import { ThemeToggle, type ThemeMode } from './components/ThemeToggle';
 import { UrlInput } from './components/UrlInput';
 
 export interface MetadataResult {
@@ -52,6 +53,8 @@ interface RecentExtraction {
   createdAt: string;
 }
 
+const themeStorageKey = 'metapeek-theme';
+
 function App() {
   const [data, setData] = useState<MetadataResult | null>(null);
   const [recent, setRecent] = useState<RecentExtraction[]>([]);
@@ -59,6 +62,20 @@ function App() {
   const [progress, setProgress] = useState(0);
   const [view, setView] = useState<'preview' | 'json'>('preview');
   const [error, setError] = useState('');
+  const [themeMode, setThemeMode] = useState<ThemeMode>(getStoredThemeMode);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    const applyTheme = () => {
+      document.documentElement.dataset.theme = getResolvedTheme(themeMode);
+    };
+
+    applyTheme();
+    mediaQuery.addEventListener('change', applyTheme);
+
+    return () => mediaQuery.removeEventListener('change', applyTheme);
+  }, [themeMode]);
 
   useEffect(() => {
     if (!isLoading) return;
@@ -110,6 +127,11 @@ function App() {
     }
   };
 
+  const handleThemeChange = (mode: ThemeMode) => {
+    setThemeMode(mode);
+    localStorage.setItem(themeStorageKey, mode);
+  };
+
   const score = data?.score ?? 0;
   const domain = getDomain(data);
 
@@ -123,7 +145,7 @@ function App() {
     <main className="min-h-screen bg-background">
       <section className="border-b border-border bg-panel">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-          <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary text-white">
                 <Sparkles className="h-5 w-5" />
@@ -133,15 +155,18 @@ function App() {
                 <p className="text-sm text-muted">Social card metadata inspector</p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted">
-              <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5">
-                <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                Mongo tracking
-              </span>
-              <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5">
-                <Activity className="h-3.5 w-3.5 text-primary" />
-                Mobile ready
-              </span>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <ThemeToggle mode={themeMode} onChange={handleThemeChange} />
+              <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted">
+                <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  Mongo tracking
+                </span>
+                <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5">
+                  <Activity className="h-3.5 w-3.5 text-primary" />
+                  Mobile ready
+                </span>
+              </div>
             </div>
           </header>
 
@@ -188,7 +213,7 @@ function App() {
           <div className="grid gap-3 sm:grid-cols-3">
             {statCards.map((item) => (
               <div key={item.label} className="rounded-lg border border-border bg-panel p-4 glass-border">
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-primary">
+                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-soft text-primary">
                   <item.icon className="h-4 w-4" />
                 </div>
                 <p className="text-sm text-muted">{item.label}</p>
@@ -242,7 +267,7 @@ function App() {
                   <button
                     key={item._id}
                     onClick={() => handleExtract(item.normalizedUrl)}
-                    className="w-full rounded-lg border border-border bg-background p-3 text-left transition hover:border-primary hover:bg-teal-50"
+                    className="w-full rounded-lg border border-border bg-background p-3 text-left transition hover:border-primary hover:bg-soft"
                   >
                     <p className="truncate text-sm font-semibold text-ink">{item.result?.title || item.normalizedUrl}</p>
                     <p className="mt-1 truncate text-xs text-muted">{item.result?.site_name || item.normalizedUrl}</p>
@@ -285,7 +310,7 @@ function App() {
 function EmptyState() {
   return (
     <div className="flex min-h-[420px] flex-col items-center justify-center rounded-lg border border-dashed border-border bg-background px-6 text-center">
-      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-teal-50 text-primary">
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-soft text-primary">
         <LayoutTemplate className="h-6 w-6" />
       </div>
       <h3 className="text-lg font-semibold text-ink">No link inspected yet</h3>
@@ -304,4 +329,20 @@ function getDomain(data: MetadataResult | null) {
   } catch {
     return data.url;
   }
+}
+
+function getStoredThemeMode(): ThemeMode {
+  const storedTheme = localStorage.getItem(themeStorageKey);
+
+  if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'auto') {
+    return storedTheme;
+  }
+
+  return 'auto';
+}
+
+function getResolvedTheme(mode: ThemeMode): 'light' | 'dark' {
+  if (mode === 'light' || mode === 'dark') return mode;
+
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }

@@ -1,15 +1,52 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #f7f8fb;
-  --color-panel: #ffffff;
-  --color-ink: #17202a;
-  --color-muted: #647084;
-  --color-border: #d9e0ea;
-  --color-primary: #0f766e;
-  --color-primary-hover: #0b5f58;
-  --color-accent: #eab308;
-  --color-danger: #c2410c;
+  --color-background: var(--theme-background);
+  --color-panel: var(--theme-panel);
+  --color-ink: var(--theme-ink);
+  --color-muted: var(--theme-muted);
+  --color-border: var(--theme-border);
+  --color-primary: var(--theme-primary);
+  --color-primary-hover: var(--theme-primary-hover);
+  --color-accent: var(--theme-accent);
+  --color-danger: var(--theme-danger);
+  --color-soft: var(--theme-soft);
+}
+
+:root {
+  color-scheme: light;
+  --theme-background: #f7f8fb;
+  --theme-panel: #ffffff;
+  --theme-ink: #17202a;
+  --theme-muted: #647084;
+  --theme-border: #d9e0ea;
+  --theme-primary: #0f766e;
+  --theme-primary-hover: #0b5f58;
+  --theme-accent: #eab308;
+  --theme-danger: #c2410c;
+  --theme-soft: #eef8f6;
+  --theme-shadow: 0 20px 60px rgb(17 24 39 / 8%);
+  --theme-scroll-track: #edf1f6;
+  --theme-scroll-thumb: #b7c2d0;
+  --theme-scroll-thumb-hover: #8794a8;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --theme-background: #0f172a;
+  --theme-panel: #111827;
+  --theme-ink: #f8fafc;
+  --theme-muted: #9aa7bc;
+  --theme-border: #273449;
+  --theme-primary: #2dd4bf;
+  --theme-primary-hover: #14b8a6;
+  --theme-accent: #facc15;
+  --theme-danger: #fb923c;
+  --theme-soft: #112f33;
+  --theme-shadow: 0 24px 70px rgb(0 0 0 / 26%);
+  --theme-scroll-track: #111827;
+  --theme-scroll-thumb: #334155;
+  --theme-scroll-thumb-hover: #475569;
 }
 
 * {
@@ -31,7 +68,7 @@ input {
 }
 
 .glass-border {
-  box-shadow: 0 20px 60px rgb(17 24 39 / 8%);
+  box-shadow: var(--theme-shadow);
 }
 
 .progress-stripes {
@@ -65,14 +102,14 @@ input {
 }
 
 ::-webkit-scrollbar-track {
-  background: #edf1f6;
+  background: var(--theme-scroll-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #b7c2d0;
+  background: var(--theme-scroll-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8794a8;
+  background: var(--theme-scroll-thumb-hover);
 }

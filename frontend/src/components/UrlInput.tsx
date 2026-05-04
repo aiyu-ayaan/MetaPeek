@@ -33,7 +33,7 @@ export function UrlInput({ onExtract, isLoading }: UrlInputProps) {
     <div className="w-full max-w-3xl">
       <form onSubmit={handleSubmit} className="relative">
         <div className={twMerge(
-          'grid w-full gap-2 rounded-lg border bg-white p-2 transition sm:grid-cols-[1fr_auto]',
+          'grid w-full gap-2 rounded-lg border bg-panel p-2 transition sm:grid-cols-[1fr_auto]',
           error ? 'border-danger/60' : 'border-border focus-within:border-primary'
         )}>
           <div className="flex min-w-0 items-center gap-2 px-2">
