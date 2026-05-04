@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Activity,
@@ -61,16 +61,8 @@ function App() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    void refreshRecent();
-  }, []);
+    if (!isLoading) return;
 
-  useEffect(() => {
-    if (!isLoading) {
-      setProgress(0);
-      return;
-    }
-
-    setProgress(12);
     const timer = window.setInterval(() => {
       setProgress((current) => Math.min(current + Math.max(4, Math.round((92 - current) / 8)), 92));
     }, 280);
@@ -78,17 +70,26 @@ function App() {
     return () => window.clearInterval(timer);
   }, [isLoading]);
 
-  const refreshRecent = async () => {
+  const refreshRecent = useCallback(async () => {
     try {
       const response = await axios.get<RecentExtraction[]>('/api/extractions/recent');
       setRecent(response.data);
     } catch {
       setRecent([]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void refreshRecent();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [refreshRecent]);
 
   const handleExtract = async (url: string) => {
     setIsLoading(true);
+    setProgress(12);
     setError('');
     setData(null);
 
@@ -103,21 +104,14 @@ function App() {
         ? requestError.response?.data?.error || requestError.message
         : 'Failed to extract metadata';
       setError(message);
+      setProgress(0);
     } finally {
       window.setTimeout(() => setIsLoading(false), 220);
     }
   };
 
   const score = data?.score ?? 0;
-  const domain = useMemo(() => {
-    if (!data?.url) return 'No URL loaded';
-
-    try {
-      return new URL(data.url).hostname.replace('www.', '');
-    } catch {
-      return data.url;
-    }
-  }, [data?.url]);
+  const domain = getDomain(data);
 
   const statCards = [
     { label: 'Quality score', value: data ? `${score}%` : '--', icon: BarChart3 },
@@ -301,3 +295,13 @@ function EmptyState() {
 }
 
 export default App;
+
+function getDomain(data: MetadataResult | null) {
+  if (!data?.url) return 'No URL loaded';
+
+  try {
+    return new URL(data.url).hostname.replace('www.', '');
+  } catch {
+    return data.url;
+  }
+}
