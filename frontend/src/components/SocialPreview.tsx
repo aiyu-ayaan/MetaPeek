@@ -21,10 +21,10 @@ export function SocialPreview({ data }: SocialPreviewProps) {
   const domain = getDomain(data);
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid gap-5 lg:grid-cols-2">
       {(['x', 'facebook', 'linkedin', 'whatsapp'] as Platform[]).map((platform) => (
-        <section key={platform} className="rounded-lg border border-border bg-background p-3 sm:p-4">
-          <div className="mb-3 flex items-center justify-between gap-3">
+        <section key={platform} className="rounded-lg border border-border bg-background p-4">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               <PlatformIcon platform={platform} />
               <h3 className="truncate text-sm font-semibold text-ink">{platformLabels[platform]}</h3>
@@ -33,7 +33,7 @@ export function SocialPreview({ data }: SocialPreviewProps) {
               {platform === 'whatsapp' ? 'Compact' : 'Card'}
             </span>
           </div>
-          <div className="flex min-h-[310px] items-center justify-center rounded-md border border-border bg-panel p-3">
+          <div className="flex min-h-[340px] items-center justify-center rounded-lg border border-border bg-panel p-4 sm:p-6">
             {renderPreview(platform, { title, description, image, domain })}
           </div>
         </section>
@@ -48,9 +48,9 @@ function renderPreview(
 ) {
   if (platform === 'whatsapp') {
     return (
-      <div className="w-full max-w-[390px] rounded-lg bg-[#d9fdd3] p-1.5 shadow-sm">
+      <div className="w-full max-w-[440px] rounded-lg bg-[#d9fdd3] p-1.5 shadow-sm">
         <div className="flex overflow-hidden rounded-md border border-[#c5e7bd] bg-[#f6fff4]">
-          <MediaBlock image={content.image} title={content.title} className="h-[104px] w-[104px] shrink-0" />
+          <MediaBlock image={content.image} title={content.title} className="h-[118px] w-[118px] shrink-0" />
           <div className="min-w-0 flex-1 p-3">
             <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-[#111b21]">{content.title}</h4>
             <p className="mt-1 line-clamp-2 text-xs leading-snug text-[#667781]">{content.description}</p>
@@ -63,7 +63,7 @@ function renderPreview(
 
   if (platform === 'linkedin') {
     return (
-      <div className="w-full max-w-[520px] overflow-hidden border border-[#bfccd6] bg-white text-left">
+      <div className="w-full max-w-[640px] overflow-hidden border border-[#bfccd6] bg-white text-left">
         <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full" />
         <div className="bg-[#eef3f8] px-4 py-3">
           <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-[#000000e6]">{content.title}</h4>
@@ -75,7 +75,7 @@ function renderPreview(
 
   if (platform === 'facebook') {
     return (
-      <div className="w-full max-w-[520px] overflow-hidden border border-[#ccd0d5] bg-[#f0f2f5] text-left">
+      <div className="w-full max-w-[640px] overflow-hidden border border-[#ccd0d5] bg-[#f0f2f5] text-left">
         <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full" />
         <div className="border-t border-[#ccd0d5] px-4 py-3">
           <p className="truncate text-xs uppercase text-[#606770]">{content.domain}</p>
@@ -87,7 +87,7 @@ function renderPreview(
   }
 
   return (
-    <div className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#2f3336] bg-black text-left">
+    <div className="w-full max-w-[640px] overflow-hidden rounded-2xl border border-[#2f3336] bg-black text-left">
       <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full border-b border-[#2f3336]" />
       <div className="p-3">
         <h4 className="line-clamp-1 text-[15px] leading-snug text-white">{content.title}</h4>

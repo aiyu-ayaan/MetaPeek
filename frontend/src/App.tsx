@@ -67,9 +67,7 @@ function App() {
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
-    const applyTheme = () => {
-      document.documentElement.dataset.theme = getResolvedTheme(themeMode);
-    };
+    const applyTheme = () => applyThemeMode(themeMode);
 
     applyTheme();
     mediaQuery.addEventListener('change', applyTheme);
@@ -130,6 +128,7 @@ function App() {
   const handleThemeChange = (mode: ThemeMode) => {
     setThemeMode(mode);
     localStorage.setItem(themeStorageKey, mode);
+    applyThemeMode(mode);
   };
 
   const score = data?.score ?? 0;
@@ -142,7 +141,7 @@ function App() {
   ];
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background text-ink transition-colors duration-200">
       <section className="border-b border-border bg-panel">
         <div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
           <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -180,7 +179,7 @@ function App() {
               </div>
               <UrlInput onExtract={handleExtract} isLoading={isLoading} />
               {error && (
-                <div className="rounded-lg border border-danger/30 bg-orange-50 px-4 py-3 text-sm font-medium text-danger">
+                <div className="rounded-lg border border-danger/30 bg-warning px-4 py-3 text-sm font-medium text-danger">
                   {error}
                 </div>
               )}
@@ -208,8 +207,8 @@ function App() {
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
-        <div className="space-y-5">
+      <section className="mx-auto w-full max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
           <div className="grid gap-3 sm:grid-cols-3">
             {statCards.map((item) => (
               <div key={item.label} className="rounded-lg border border-border bg-panel p-4 glass-border">
@@ -222,88 +221,120 @@ function App() {
             ))}
           </div>
 
-          <div className="rounded-lg border border-border bg-panel p-3 glass-border sm:p-5">
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-ink">Results</h2>
-                <p className="text-sm text-muted">{data ? `Loaded metadata for ${domain}` : 'Your previews and JSON output will appear here.'}</p>
-              </div>
-              <div className="grid grid-cols-2 rounded-lg border border-border bg-background p-1">
-                <button
-                  onClick={() => setView('preview')}
-                  className={twMerge(
-                    'inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition',
-                    view === 'preview' ? 'bg-panel text-primary shadow-sm' : 'text-muted hover:text-ink'
-                  )}
-                >
-                  <LayoutTemplate className="h-4 w-4" />
-                  Preview
-                </button>
-                <button
-                  onClick={() => setView('json')}
-                  className={twMerge(
-                    'inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-semibold transition',
-                    view === 'json' ? 'bg-panel text-primary shadow-sm' : 'text-muted hover:text-ink'
-                  )}
-                >
-                  <Code2 className="h-4 w-4" />
-                  JSON
-                </button>
+          <aside className="space-y-5">
+            <div className="rounded-lg border border-border bg-panel p-5 glass-border">
+              <h2 className="mb-4 text-lg font-semibold text-ink">Recent scans</h2>
+              <div className="space-y-3">
+                {recent.length ? (
+                  recent.map((item) => (
+                    <button
+                      key={item._id}
+                      onClick={() => handleExtract(item.normalizedUrl)}
+                      className="w-full rounded-lg border border-border bg-background p-3 text-left transition hover:border-primary hover:bg-soft"
+                    >
+                      <p className="truncate text-sm font-semibold text-ink">{item.result?.title || item.normalizedUrl}</p>
+                      <p className="mt-1 truncate text-xs text-muted">{item.result?.site_name || item.normalizedUrl}</p>
+                      <div className="mt-3 flex items-center gap-3 text-xs text-muted">
+                        <span className="inline-flex items-center gap-1">
+                          <Clock3 className="h-3.5 w-3.5" />
+                          {item.responseTimeMs || 0}ms
+                        </span>
+                        <span>{new Date(item.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </button>
+                  ))
+                ) : (
+                  <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted">
+                    MongoDB-backed scan history will show up once you extract a link.
+                  </p>
+                )}
               </div>
             </div>
 
-            <div className="min-h-[420px]">
-              {isLoading ? <SkeletonLoader /> : data ? view === 'preview' ? <SocialPreview data={data} /> : <JsonViewer data={data} /> : <EmptyState />}
+            <div className="rounded-lg border border-border bg-slate-950 p-5 text-white glass-border">
+              <h2 className="text-lg font-semibold">Production notes</h2>
+              <div className="mt-4 space-y-3 text-sm text-slate-300">
+                <p className="flex gap-2">
+                  <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                  Relative images and canonical URLs are resolved before previews render.
+                </p>
+                <p className="flex gap-2">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+                  Each extraction is stored with status, latency, and result payload when MongoDB is connected.
+                </p>
+              </div>
             </div>
-          </div>
+          </aside>
         </div>
 
-        <aside className="space-y-5">
-          <div className="rounded-lg border border-border bg-panel p-5 glass-border">
-            <h2 className="mb-4 text-lg font-semibold text-ink">Recent scans</h2>
-            <div className="space-y-3">
-              {recent.length ? (
-                recent.map((item) => (
-                  <button
-                    key={item._id}
-                    onClick={() => handleExtract(item.normalizedUrl)}
-                    className="w-full rounded-lg border border-border bg-background p-3 text-left transition hover:border-primary hover:bg-soft"
-                  >
-                    <p className="truncate text-sm font-semibold text-ink">{item.result?.title || item.normalizedUrl}</p>
-                    <p className="mt-1 truncate text-xs text-muted">{item.result?.site_name || item.normalizedUrl}</p>
-                    <div className="mt-3 flex items-center gap-3 text-xs text-muted">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock3 className="h-3.5 w-3.5" />
-                        {item.responseTimeMs || 0}ms
-                      </span>
-                      <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                    </div>
-                  </button>
-                ))
-              ) : (
-                <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted">
-                  MongoDB-backed scan history will show up once you extract a link.
-                </p>
-              )}
+        <div className="rounded-lg border border-border bg-panel p-3 glass-border sm:p-5">
+          <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-ink">Results</h2>
+              <p className="text-sm text-muted">{data ? `Loaded metadata for ${domain}` : 'Your previews and JSON output will appear here.'}</p>
+            </div>
+            <div className="grid grid-cols-2 rounded-lg border border-border bg-background p-1">
+              <button
+                onClick={() => setView('preview')}
+                className={twMerge(
+                  'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
+                  view === 'preview' ? 'bg-panel text-primary shadow-sm' : 'text-muted hover:text-ink'
+                )}
+              >
+                <LayoutTemplate className="h-4 w-4" />
+                Preview
+              </button>
+              <button
+                onClick={() => setView('json')}
+                className={twMerge(
+                  'inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition',
+                  view === 'json' ? 'bg-panel text-primary shadow-sm' : 'text-muted hover:text-ink'
+                )}
+              >
+                <Code2 className="h-4 w-4" />
+                JSON
+              </button>
             </div>
           </div>
 
-          <div className="rounded-lg border border-border bg-ink p-5 text-white glass-border">
-            <h2 className="text-lg font-semibold">Production notes</h2>
-            <div className="mt-4 space-y-3 text-sm text-slate-300">
-              <p className="flex gap-2">
-                <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                Relative images and canonical URLs are resolved before previews render.
-              </p>
-              <p className="flex gap-2">
-                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                Each extraction is stored with status, latency, and result payload when MongoDB is connected.
-              </p>
-            </div>
+          {data && <MetadataSummary data={data} />}
+
+          <div className="min-h-[420px]">
+            {isLoading ? <SkeletonLoader /> : data ? view === 'preview' ? <SocialPreview data={data} /> : <JsonViewer data={data} /> : <EmptyState />}
           </div>
-        </aside>
+        </div>
       </section>
     </main>
+  );
+}
+
+function MetadataSummary({ data }: { data: MetadataResult }) {
+  const title = data.og?.title || data.twitter?.title || data.title || 'Missing';
+  const description = data.og?.description || data.twitter?.description || data.description || 'Missing';
+  const image = data.og?.image || data.twitter?.image || data.image;
+  const canonicalUrl = data.og?.url || data.url;
+
+  return (
+    <div className="mb-5 grid gap-3 rounded-lg border border-border bg-background p-3 md:grid-cols-2 xl:grid-cols-4">
+      <SummaryItem label="Title" value={title} state={title === 'Missing' ? 'Missing' : 'Ready'} />
+      <SummaryItem label="Description" value={description} state={description === 'Missing' ? 'Missing' : 'Ready'} />
+      <SummaryItem label="Preview image" value={image || 'Missing'} state={image ? 'Ready' : 'Missing'} />
+      <SummaryItem label="Canonical URL" value={canonicalUrl || 'Missing'} state={canonicalUrl ? 'Ready' : 'Missing'} />
+    </div>
+  );
+}
+
+function SummaryItem({ label, value, state }: { label: string; value: string; state: 'Ready' | 'Missing' }) {
+  return (
+    <div className="min-w-0 rounded-md border border-border bg-panel p-3">
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <p className="text-xs font-semibold uppercase text-muted">{label}</p>
+        <span className={twMerge('rounded-full px-2 py-0.5 text-xs font-semibold', state === 'Ready' ? 'bg-soft text-primary' : 'bg-warning text-danger')}>
+          {state}
+        </span>
+      </div>
+      <p className="line-clamp-2 break-words text-sm font-medium text-ink">{value}</p>
+    </div>
   );
 }
 
@@ -345,4 +376,9 @@ function getResolvedTheme(mode: ThemeMode): 'light' | 'dark' {
   if (mode === 'light' || mode === 'dark') return mode;
 
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyThemeMode(mode: ThemeMode) {
+  document.documentElement.dataset.theme = getResolvedTheme(mode);
+  document.documentElement.dataset.themeMode = mode;
 }

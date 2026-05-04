@@ -11,9 +11,11 @@
   --color-accent: var(--theme-accent);
   --color-danger: var(--theme-danger);
   --color-soft: var(--theme-soft);
+  --color-warning: var(--theme-warning);
 }
 
-:root {
+:root,
+:root[data-theme='light'] {
   color-scheme: light;
   --theme-background: #f7f8fb;
   --theme-panel: #ffffff;
@@ -25,6 +27,7 @@
   --theme-accent: #eab308;
   --theme-danger: #c2410c;
   --theme-soft: #eef8f6;
+  --theme-warning: #fff7ed;
   --theme-shadow: 0 20px 60px rgb(17 24 39 / 8%);
   --theme-scroll-track: #edf1f6;
   --theme-scroll-thumb: #b7c2d0;
@@ -43,6 +46,7 @@
   --theme-accent: #facc15;
   --theme-danger: #fb923c;
   --theme-soft: #112f33;
+  --theme-warning: #321c12;
   --theme-shadow: 0 24px 70px rgb(0 0 0 / 26%);
   --theme-scroll-track: #111827;
   --theme-scroll-thumb: #334155;
