@@ -1,169 +1,139 @@
-
-import { Globe, MessageCircle } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
+import { Globe2, MessageCircle } from 'lucide-react';
+import type { MetadataResult } from '../App';
 
 interface SocialPreviewProps {
-  data: {
-    title: string;
-    description: string;
-    image: string;
-    url: string;
-    site_name: string;
-    og?: any;
-    twitter?: any;
-  } | null;
+  data: MetadataResult;
 }
 
-type Platform = 'twitter' | 'facebook' | 'linkedin' | 'whatsapp';
+type Platform = 'x' | 'facebook' | 'linkedin' | 'whatsapp';
+
+const platformLabels: Record<Platform, string> = {
+  x: 'X / Twitter',
+  facebook: 'Facebook',
+  linkedin: 'LinkedIn',
+  whatsapp: 'WhatsApp',
+};
 
 export function SocialPreview({ data }: SocialPreviewProps) {
-  if (!data) return null;
-
   const title = data.og?.title || data.twitter?.title || data.title || 'No title available';
   const description = data.og?.description || data.twitter?.description || data.description || 'No description available';
   const image = data.og?.image || data.twitter?.image || data.image;
-  const domain = data.site_name || (data.url ? new URL(data.url).hostname.replace('www.', '') : 'website.com');
-
-  const renderPreview = (platform: Platform) => {
-    switch (platform) {
-      case 'twitter':
-        return (
-          <div className="w-full max-w-[500px] mx-auto bg-black rounded-xl border border-gray-800 overflow-hidden font-sans">
-            {image ? (
-              <div className="w-full aspect-[1.91/1] bg-gray-900 relative overflow-hidden border-b border-gray-800">
-                <img src={image} alt={title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x418?text=Image+Not+Found'; }} />
-              </div>
-            ) : (
-              <div className="w-full aspect-[1.91/1] bg-gray-900 flex items-center justify-center border-b border-gray-800">
-                <Globe className="w-12 h-12 text-gray-700" />
-              </div>
-            )}
-            <div className="p-3 bg-black">
-              <p className="text-[15px] font-normal text-white leading-tight mb-0.5 line-clamp-1">{title}</p>
-              <p className="text-[15px] text-gray-500 leading-snug line-clamp-2">{description}</p>
-              <p className="text-[15px] text-gray-500 mt-1">{domain}</p>
-            </div>
-          </div>
-        );
-
-      case 'facebook':
-        return (
-          <div className="w-full max-w-[500px] mx-auto bg-[#F0F2F5] rounded-none border border-gray-300 font-sans text-left">
-            {image ? (
-              <div className="w-full aspect-[1.91/1] bg-gray-200 relative overflow-hidden">
-                <img src={image} alt={title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x418?text=Image+Not+Found'; }} />
-              </div>
-            ) : (
-              <div className="w-full aspect-[1.91/1] bg-gray-200 flex items-center justify-center">
-                <Globe className="w-12 h-12 text-gray-400" />
-              </div>
-            )}
-            <div className="px-4 py-2.5 bg-[#F0F2F5] border-t border-gray-300">
-              <p className="text-[12px] font-normal text-[#606770] uppercase tracking-wider mb-1">
-                {domain}
-              </p>
-              <h3 className="text-[16px] font-semibold text-[#1D2129] leading-tight mb-1 line-clamp-1">
-                {title}
-              </h3>
-              <p className="text-[14px] text-[#606770] leading-snug line-clamp-1">
-                {description}
-              </p>
-            </div>
-          </div>
-        );
-
-      case 'linkedin':
-        return (
-          <div className="w-full max-w-[500px] mx-auto bg-white border border-[#BFCCD6] font-sans text-left">
-            {image ? (
-              <div className="w-full aspect-[1.91/1] bg-[#F8FAFD] relative overflow-hidden">
-                <img src={image} alt={title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/800x418?text=Image+Not+Found'; }} />
-              </div>
-            ) : (
-              <div className="w-full aspect-[1.91/1] bg-[#F8FAFD] flex items-center justify-center">
-                <Globe className="w-12 h-12 text-[#BFCCD6]" />
-              </div>
-            )}
-            <div className="px-4 py-2 bg-[#EEF3F8]">
-              <h3 className="text-[14px] font-semibold text-[#000000e6] leading-tight mb-0.5 line-clamp-1">
-                {title}
-              </h3>
-              <p className="text-[12px] text-[#00000099] leading-snug line-clamp-1">
-                {domain}
-              </p>
-            </div>
-          </div>
-        );
-
-      case 'whatsapp':
-        return (
-          <div className="w-full max-w-[400px] mx-auto bg-[#E1F6CB] rounded-lg p-1.5 font-sans relative shadow-sm">
-             <div className="bg-[#E1F6CB] rounded-md overflow-hidden border border-[#D1E6BB] flex">
-                {image ? (
-                  <div className="w-[100px] h-[100px] bg-gray-200 shrink-0">
-                    <img src={image} alt={title} className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/100?text=NA'; }} />
-                  </div>
-                ) : (
-                  <div className="w-[100px] h-[100px] bg-gray-200 shrink-0 flex items-center justify-center">
-                    <Globe className="w-8 h-8 text-gray-400" />
-                  </div>
-                )}
-                <div className="p-2 flex flex-col justify-center bg-[#F2FBF1] flex-1 min-w-0">
-                  <h3 className="text-[14px] font-semibold text-[#111B21] leading-tight mb-1 line-clamp-1">
-                    {title}
-                  </h3>
-                  <p className="text-[13px] text-[#667781] leading-snug line-clamp-2 mb-1">
-                    {description}
-                  </p>
-                  <p className="text-[12px] text-[#667781] line-clamp-1">
-                    {domain}
-                  </p>
-                </div>
-             </div>
-          </div>
-        );
-      
-      default:
-        return null;
-    }
-  };
-
-  const platforms = [
-    { 
-      id: 'twitter', 
-      icon: () => <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 4.09H5.078z"/></svg>, 
-      label: 'Twitter / X' 
-    },
-    { 
-      id: 'facebook', 
-      icon: () => <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06C2 17.06 5.66 21.21 10.44 21.96V14.96H7.9V12.06H10.44V9.85C10.44 7.34 11.93 5.96 14.22 5.96C15.31 5.96 16.45 6.15 16.45 6.15V8.62H15.19C13.95 8.62 13.56 9.39 13.56 10.18V12.06H16.34L15.89 14.96H13.56V21.96A10 10 0 0 0 22 12.06C22 6.53 17.5 2.04 12 2.04Z"/></svg>, 
-      label: 'Facebook' 
-    },
-    { 
-      id: 'linkedin', 
-      icon: () => <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>, 
-      label: 'LinkedIn' 
-    },
-    { 
-      id: 'whatsapp', 
-      icon: MessageCircle, 
-      label: 'WhatsApp' 
-    },
-  ] as const;
+  const domain = getDomain(data);
 
   return (
-    <div className="w-full space-y-12 pb-12">
-      {platforms.map((p) => (
-        <div key={p.id} className="space-y-4">
-          <div className="flex items-center gap-2 text-text-main font-semibold text-lg pb-2 border-b border-border/50">
-            <p.icon />
-            <span>{p.label} Preview</span>
+    <div className="grid gap-4 xl:grid-cols-2">
+      {(['x', 'facebook', 'linkedin', 'whatsapp'] as Platform[]).map((platform) => (
+        <section key={platform} className="rounded-lg border border-border bg-background p-3 sm:p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-2">
+              <PlatformIcon platform={platform} />
+              <h3 className="truncate text-sm font-semibold text-ink">{platformLabels[platform]}</h3>
+            </div>
+            <span className="rounded-full border border-border bg-panel px-2.5 py-1 text-xs font-medium text-muted">
+              {platform === 'whatsapp' ? 'Compact' : 'Card'}
+            </span>
           </div>
-          <div className="bg-[#E2E8F0] dark:bg-black/20 p-8 rounded-2xl flex items-center justify-center min-h-[400px]">
-            {renderPreview(p.id)}
+          <div className="flex min-h-[310px] items-center justify-center rounded-md border border-border bg-panel p-3">
+            {renderPreview(platform, { title, description, image, domain })}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );
+}
+
+function renderPreview(
+  platform: Platform,
+  content: { title: string; description: string; image: string; domain: string }
+) {
+  if (platform === 'whatsapp') {
+    return (
+      <div className="w-full max-w-[390px] rounded-lg bg-[#d9fdd3] p-1.5 shadow-sm">
+        <div className="flex overflow-hidden rounded-md border border-[#c5e7bd] bg-[#f6fff4]">
+          <MediaBlock image={content.image} title={content.title} className="h-[104px] w-[104px] shrink-0" />
+          <div className="min-w-0 flex-1 p-3">
+            <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-[#111b21]">{content.title}</h4>
+            <p className="mt-1 line-clamp-2 text-xs leading-snug text-[#667781]">{content.description}</p>
+            <p className="mt-2 truncate text-xs text-[#667781]">{content.domain}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (platform === 'linkedin') {
+    return (
+      <div className="w-full max-w-[520px] overflow-hidden border border-[#bfccd6] bg-white text-left">
+        <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full" />
+        <div className="bg-[#eef3f8] px-4 py-3">
+          <h4 className="line-clamp-2 text-sm font-semibold leading-snug text-[#000000e6]">{content.title}</h4>
+          <p className="mt-1 truncate text-xs text-[#00000099]">{content.domain}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (platform === 'facebook') {
+    return (
+      <div className="w-full max-w-[520px] overflow-hidden border border-[#ccd0d5] bg-[#f0f2f5] text-left">
+        <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full" />
+        <div className="border-t border-[#ccd0d5] px-4 py-3">
+          <p className="truncate text-xs uppercase text-[#606770]">{content.domain}</p>
+          <h4 className="mt-1 line-clamp-2 text-base font-semibold leading-tight text-[#1d2129]">{content.title}</h4>
+          <p className="mt-1 line-clamp-2 text-sm text-[#606770]">{content.description}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-[520px] overflow-hidden rounded-2xl border border-[#2f3336] bg-black text-left">
+      <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full border-b border-[#2f3336]" />
+      <div className="p-3">
+        <h4 className="line-clamp-1 text-[15px] leading-snug text-white">{content.title}</h4>
+        <p className="mt-1 line-clamp-2 text-[15px] leading-snug text-[#71767b]">{content.description}</p>
+        <p className="mt-2 truncate text-[15px] text-[#71767b]">{content.domain}</p>
+      </div>
+    </div>
+  );
+}
+
+function MediaBlock({ image, title, className }: { image: string; title: string; className: string }) {
+  if (!image) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-slate-100`}>
+        <Globe2 className="h-10 w-10 text-slate-400" />
+      </div>
+    );
+  }
+
+  return (
+    <div className={`${className} overflow-hidden bg-slate-100`}>
+      <img
+        src={image}
+        alt={title}
+        className="h-full w-full object-cover"
+        onError={(event) => {
+          event.currentTarget.style.display = 'none';
+        }}
+      />
+    </div>
+  );
+}
+
+function PlatformIcon({ platform }: { platform: Platform }) {
+  if (platform === 'whatsapp') return <MessageCircle className="h-4 w-4 text-primary" />;
+  if (platform === 'x') return <span className="text-sm font-bold text-ink">X</span>;
+  if (platform === 'facebook') return <span className="text-sm font-bold text-[#1877f2]">f</span>;
+  return <span className="text-sm font-bold text-[#0a66c2]">in</span>;
+}
+
+function getDomain(data: MetadataResult) {
+  if (data.site_name) return data.site_name;
+
+  try {
+    return new URL(data.url).hostname.replace('www.', '');
+  } catch {
+    return 'website.com';
+  }
 }

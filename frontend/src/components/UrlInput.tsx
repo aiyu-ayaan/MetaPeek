@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Search, Loader2 } from 'lucide-react';
-import { clsx } from 'clsx';
+import { Loader2, Search } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 
 interface UrlInputProps {
@@ -14,51 +13,52 @@ export function UrlInput({ onExtract, isLoading }: UrlInputProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url) {
+    const nextUrl = url.trim();
+
+    if (!nextUrl) {
       setError('Please enter a URL');
       return;
     }
     
     try {
-      new URL(url);
+      new URL(nextUrl);
       setError('');
-      onExtract(url);
+      onExtract(nextUrl);
     } catch {
       setError('Please enter a valid URL (e.g., https://example.com)');
     }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8">
-      <form onSubmit={handleSubmit} className="relative group">
+    <div className="w-full max-w-3xl">
+      <form onSubmit={handleSubmit} className="relative">
         <div className={twMerge(
-          "relative flex items-center w-full rounded-2xl overflow-hidden",
-          "bg-card border-2 transition-all duration-300",
-          error ? "border-red-500/50" : "border-border hover:border-primary/50 focus-within:border-primary",
-          "shadow-[0_8px_30px_rgb(0,0,0,0.12)]"
+          'grid w-full gap-2 rounded-lg border bg-white p-2 transition sm:grid-cols-[1fr_auto]',
+          error ? 'border-danger/60' : 'border-border focus-within:border-primary'
         )}>
-          <div className="pl-4 text-text-muted">
-            <Search className="w-5 h-5" />
+          <div className="flex min-w-0 items-center gap-2 px-2">
+            <Search className="h-5 w-5 shrink-0 text-muted" />
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => {
+                setUrl(e.target.value);
+                if (error) setError('');
+              }}
+              placeholder="https://example.com/article"
+              className="min-h-11 w-full min-w-0 bg-transparent text-base text-ink outline-none placeholder:text-muted"
+              disabled={isLoading}
+              inputMode="url"
+              autoCapitalize="none"
+              autoComplete="url"
+            />
           </div>
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => {
-              setUrl(e.target.value);
-              if (error) setError('');
-            }}
-            placeholder="Paste a URL here to extract metadata..."
-            className="w-full py-4 px-4 bg-transparent outline-none text-text-main placeholder-text-muted/60"
-            disabled={isLoading}
-          />
           <button
             type="submit"
             disabled={isLoading || !url}
             className={twMerge(
-              "absolute right-2 px-6 py-2 rounded-xl font-medium transition-all duration-300",
-              "bg-primary text-white hover:bg-primary-hover active:scale-95",
-              "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary disabled:active:scale-100",
-              "flex items-center gap-2"
+              'inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-5 font-semibold text-white transition',
+              'hover:bg-primary-hover active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-55'
             )}
           >
             {isLoading ? (
@@ -72,7 +72,7 @@ export function UrlInput({ onExtract, isLoading }: UrlInputProps) {
           </button>
         </div>
         {error && (
-          <p className="absolute -bottom-6 left-2 text-sm text-red-400 font-medium animate-in fade-in slide-in-from-top-1">
+          <p className="mt-2 text-sm font-medium text-danger">
             {error}
           </p>
         )}

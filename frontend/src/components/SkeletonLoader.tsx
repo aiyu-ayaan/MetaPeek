@@ -1,12 +1,22 @@
 export function SkeletonLoader() {
   return (
-    <div className="w-full max-w-[500px] mx-auto bg-card rounded-xl border border-border overflow-hidden shadow-lg animate-pulse">
-      <div className="w-full h-[260px] bg-border/50" />
-      <div className="p-4 bg-card">
-        <div className="h-3 w-24 bg-border/50 rounded mb-3" />
-        <div className="h-5 w-3/4 bg-border/50 rounded mb-2" />
-        <div className="h-4 w-full bg-border/50 rounded mb-1" />
-        <div className="h-4 w-2/3 bg-border/50 rounded" />
+    <div className="grid gap-4 lg:grid-cols-2">
+      <div className="overflow-hidden rounded-lg border border-border bg-panel animate-pulse">
+        <div className="h-52 w-full bg-border/70" />
+        <div className="space-y-3 p-4">
+          <div className="h-3 w-24 rounded bg-border" />
+          <div className="h-5 w-3/4 rounded bg-border" />
+          <div className="h-4 w-full rounded bg-border" />
+          <div className="h-4 w-2/3 rounded bg-border" />
+        </div>
+      </div>
+      <div className="rounded-lg border border-border bg-background p-4 animate-pulse">
+        <div className="mb-4 h-5 w-36 rounded bg-border" />
+        <div className="space-y-3">
+          <div className="h-12 rounded bg-border" />
+          <div className="h-12 rounded bg-border" />
+          <div className="h-12 rounded bg-border" />
+        </div>
       </div>
     </div>
   );

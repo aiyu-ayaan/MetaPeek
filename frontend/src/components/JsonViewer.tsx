@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import type { MetadataResult } from '../App';
 
 interface JsonViewerProps {
-  data: any;
+  data: MetadataResult;
 }
 
 export function JsonViewer({ data }: JsonViewerProps) {
@@ -19,21 +20,20 @@ export function JsonViewer({ data }: JsonViewerProps) {
 
   return (
     <div className="w-full relative group">
-      <div className="absolute right-4 top-4 z-10">
+      <div className="absolute right-3 top-3 z-10">
         <button
           onClick={handleCopy}
           className={twMerge(
-            "p-2 rounded-lg bg-background/50 backdrop-blur border border-border transition-all duration-300",
-            "hover:bg-primary/20 hover:border-primary/50 text-text-muted hover:text-primary",
-            copied && "bg-green-500/20 border-green-500/50 text-green-400 hover:text-green-400"
+            'rounded-md border border-border bg-panel p-2 text-muted transition hover:border-primary hover:text-primary',
+            copied && 'border-primary bg-teal-50 text-primary'
           )}
           title="Copy JSON"
         >
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
         </button>
       </div>
-      <div className="bg-background rounded-xl border border-border p-6 overflow-x-auto">
-        <pre className="text-sm font-mono text-text-muted">
+      <div className="max-h-[680px] overflow-auto rounded-lg border border-border bg-[#111827] p-4 pt-14 sm:p-6 sm:pt-14">
+        <pre className="text-sm font-mono leading-relaxed text-slate-200">
           <code>{JSON.stringify(data, null, 2)}</code>
         </pre>
       </div>
