@@ -3,13 +3,9 @@ import axios from 'axios';
 import {
   Activity,
   BarChart3,
-  Clock3,
   Code2,
   Globe2,
-  History,
   LayoutTemplate,
-  Link2,
-  ShieldCheck,
   Sparkles,
 } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -42,22 +38,10 @@ export interface MetadataResult {
   };
 }
 
-interface RecentExtraction {
-  _id: string;
-  normalizedUrl: string;
-  result?: {
-    title?: string;
-    site_name?: string;
-  };
-  responseTimeMs?: number;
-  createdAt: string;
-}
-
 const themeStorageKey = 'metapeek-theme';
 
 function App() {
   const [data, setData] = useState<MetadataResult | null>(null);
-  const [recent, setRecent] = useState<RecentExtraction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [view, setView] = useState<'preview' | 'json'>('preview');
@@ -85,23 +69,6 @@ function App() {
     return () => window.clearInterval(timer);
   }, [isLoading]);
 
-  const refreshRecent = useCallback(async () => {
-    try {
-      const response = await axios.get<RecentExtraction[]>('/api/extractions/recent');
-      setRecent(response.data);
-    } catch {
-      setRecent([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void refreshRecent();
-    }, 0);
-
-    return () => window.clearTimeout(timer);
-  }, [refreshRecent]);
-
   const handleExtract = async (url: string) => {
     setIsLoading(true);
     setProgress(12);
@@ -113,7 +80,6 @@ function App() {
       setProgress(100);
       setData(response.data);
       setView('preview');
-      void refreshRecent();
     } catch (requestError) {
       const message = axios.isAxiosError(requestError)
         ? requestError.response?.data?.error || requestError.message
@@ -136,7 +102,6 @@ function App() {
 
   const statCards = [
     { label: 'Quality score', value: data ? `${score}%` : '--', icon: BarChart3 },
-    { label: 'Recent scans', value: recent.length.toString(), icon: History },
     { label: 'Result source', value: data?.site_name || domain, icon: Globe2 },
   ];
 
@@ -156,16 +121,6 @@ function App() {
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
               <ThemeToggle mode={themeMode} onChange={handleThemeChange} />
-              <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-muted">
-                <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5">
-                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                  Mongo tracking
-                </span>
-                <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5">
-                  <Activity className="h-3.5 w-3.5 text-primary" />
-                  Mobile ready
-                </span>
-              </div>
             </div>
           </header>
 
@@ -208,63 +163,16 @@ function App() {
       </section>
 
       <section className="mx-auto w-full max-w-7xl space-y-5 px-4 py-6 sm:px-6 lg:px-8">
-        <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
-          <div className="grid gap-3 sm:grid-cols-3">
-            {statCards.map((item) => (
-              <div key={item.label} className="rounded-lg border border-border bg-panel p-4 glass-border">
-                <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-soft text-primary">
-                  <item.icon className="h-4 w-4" />
-                </div>
-                <p className="text-sm text-muted">{item.label}</p>
-                <p className="mt-1 truncate text-lg font-semibold text-ink">{item.value}</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {statCards.map((item) => (
+            <div key={item.label} className="rounded-lg border border-border bg-panel p-4 glass-border">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-soft text-primary">
+                <item.icon className="h-4 w-4" />
               </div>
-            ))}
-          </div>
-
-          <aside className="space-y-5">
-            <div className="rounded-lg border border-border bg-panel p-5 glass-border">
-              <h2 className="mb-4 text-lg font-semibold text-ink">Recent scans</h2>
-              <div className="space-y-3">
-                {recent.length ? (
-                  recent.map((item) => (
-                    <button
-                      key={item._id}
-                      onClick={() => handleExtract(item.normalizedUrl)}
-                      className="w-full rounded-lg border border-border bg-background p-3 text-left transition hover:border-primary hover:bg-soft"
-                    >
-                      <p className="truncate text-sm font-semibold text-ink">{item.result?.title || item.normalizedUrl}</p>
-                      <p className="mt-1 truncate text-xs text-muted">{item.result?.site_name || item.normalizedUrl}</p>
-                      <div className="mt-3 flex items-center gap-3 text-xs text-muted">
-                        <span className="inline-flex items-center gap-1">
-                          <Clock3 className="h-3.5 w-3.5" />
-                          {item.responseTimeMs || 0}ms
-                        </span>
-                        <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </button>
-                  ))
-                ) : (
-                  <p className="rounded-lg border border-dashed border-border p-4 text-sm text-muted">
-                    MongoDB-backed scan history will show up once you extract a link.
-                  </p>
-                )}
-              </div>
+              <p className="text-sm text-muted">{item.label}</p>
+              <p className="mt-1 truncate text-lg font-semibold text-ink">{item.value}</p>
             </div>
-
-            <div className="rounded-lg border border-border bg-slate-950 p-5 text-white glass-border">
-              <h2 className="text-lg font-semibold">Production notes</h2>
-              <div className="mt-4 space-y-3 text-sm text-slate-300">
-                <p className="flex gap-2">
-                  <Link2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  Relative images and canonical URLs are resolved before previews render.
-                </p>
-                <p className="flex gap-2">
-                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
-                  Each extraction is stored with status, latency, and result payload when MongoDB is connected.
-                </p>
-              </div>
-            </div>
-          </aside>
+          ))}
         </div>
 
         <div className="rounded-lg border border-border bg-panel p-3 glass-border sm:p-5">

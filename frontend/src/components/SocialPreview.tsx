@@ -1,17 +1,19 @@
-import { Globe2, MessageCircle } from 'lucide-react';
+import { Globe2, MessageCircle, Gamepad2, Hash } from 'lucide-react';
 import type { MetadataResult } from '../App';
 
 interface SocialPreviewProps {
   data: MetadataResult;
 }
 
-type Platform = 'x' | 'facebook' | 'linkedin' | 'whatsapp';
+type Platform = 'x' | 'facebook' | 'linkedin' | 'whatsapp' | 'discord' | 'slack';
 
 const platformLabels: Record<Platform, string> = {
   x: 'X / Twitter',
   facebook: 'Facebook',
   linkedin: 'LinkedIn',
   whatsapp: 'WhatsApp',
+  discord: 'Discord',
+  slack: 'Slack',
 };
 
 export function SocialPreview({ data }: SocialPreviewProps) {
@@ -22,7 +24,7 @@ export function SocialPreview({ data }: SocialPreviewProps) {
 
   return (
     <div className="grid gap-5 lg:grid-cols-2">
-      {(['x', 'facebook', 'linkedin', 'whatsapp'] as Platform[]).map((platform) => (
+      {(['x', 'facebook', 'linkedin', 'whatsapp', 'discord', 'slack'] as Platform[]).map((platform) => (
         <section key={platform} className="rounded-lg border border-border bg-background p-4">
           <div className="mb-4 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
@@ -30,7 +32,7 @@ export function SocialPreview({ data }: SocialPreviewProps) {
               <h3 className="truncate text-sm font-semibold text-ink">{platformLabels[platform]}</h3>
             </div>
             <span className="rounded-full border border-border bg-panel px-2.5 py-1 text-xs font-medium text-muted">
-              {platform === 'whatsapp' ? 'Compact' : 'Card'}
+              {platform === 'whatsapp' ? 'Compact' : platform === 'slack' || platform === 'discord' ? 'Embed' : 'Card'}
             </span>
           </div>
           <div className="flex min-h-[340px] items-center justify-center rounded-lg border border-border bg-panel p-4 sm:p-6">
@@ -86,6 +88,35 @@ function renderPreview(
     );
   }
 
+  if (platform === 'discord') {
+    return (
+      <div className="w-full max-w-[520px] rounded border-l-4 border-[#5865F2] bg-[#2B2D31] p-4 text-left shadow-sm">
+        <div className="mb-1 text-xs font-semibold text-[#DBDEE1]">{content.domain}</div>
+        <div className="mb-2 text-base font-semibold text-[#00A8FC] cursor-pointer hover:underline">{content.title}</div>
+        <div className="mb-3 text-sm leading-snug text-[#DBDEE1]">{content.description}</div>
+        <MediaBlock image={content.image} title={content.title} className="max-w-[400px] aspect-[1.91/1] rounded-lg" />
+      </div>
+    );
+  }
+
+  if (platform === 'slack') {
+    return (
+      <div className="w-full max-w-[500px] text-left">
+        <div className="flex items-center gap-2 mb-1">
+          <div className="flex h-4 w-4 items-center justify-center overflow-hidden rounded bg-slate-200">
+            <img src={`https://www.google.com/s2/favicons?domain=${content.domain}&sz=32`} alt="" className="h-full w-full object-cover" />
+          </div>
+          <span className="text-[13px] font-bold text-ink">{content.domain}</span>
+        </div>
+        <div className="ml-2 border-l-[4px] border-[#E0E1E5] pl-3">
+          <div className="mb-1 cursor-pointer text-[15px] font-bold text-[#1164A3] hover:underline">{content.title}</div>
+          <div className="mb-2 text-[15px] leading-snug text-ink">{content.description}</div>
+          <MediaBlock image={content.image} title={content.title} className="max-w-[360px] aspect-[1.91/1] rounded-lg" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-[640px] overflow-hidden rounded-2xl border border-[#2f3336] bg-black text-left">
       <MediaBlock image={content.image} title={content.title} className="aspect-[1.91/1] w-full border-b border-[#2f3336]" />
@@ -123,6 +154,8 @@ function MediaBlock({ image, title, className }: { image: string; title: string;
 
 function PlatformIcon({ platform }: { platform: Platform }) {
   if (platform === 'whatsapp') return <MessageCircle className="h-4 w-4 text-primary" />;
+  if (platform === 'discord') return <Gamepad2 className="h-4 w-4 text-[#5865F2]" />;
+  if (platform === 'slack') return <Hash className="h-4 w-4 text-[#E01E5A]" />;
   if (platform === 'x') return <span className="text-sm font-bold text-ink">X</span>;
   if (platform === 'facebook') return <span className="text-sm font-bold text-[#1877f2]">f</span>;
   return <span className="text-sm font-bold text-[#0a66c2]">in</span>;
